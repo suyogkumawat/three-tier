@@ -25,7 +25,7 @@ jobs:
 
             # Clone or pull latest code
             if [ ! -d "\$PROJECT_DIR" ]; then
-              git clone https://github.com/YOUR_USERNAME/\$REPO_NAME.git \$PROJECT_DIR
+              git clone https://github.com/suyogkumawat/three-tier.git \$PROJECT_DIR
             else
               cd \$PROJECT_DIR
               git pull origin main
