@@ -60,11 +60,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-image
+          path: .
 
       - name: Download backend image
         uses: actions/download-artifact@v4
         with:
           name: backend-image
+          path: .
+
+      - name: List downloaded files
+        run: ls -lah
 
       - name: Copy image files to EC2
         run: |
