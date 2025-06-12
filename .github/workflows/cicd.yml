@@ -1,10 +1,11 @@
 name: CI/CD for Python 3-Tier App
 
+#on:
+#  push:
+#    branches:
+#      - main
 on:
-  push:
-    branches:
-      - main
-
+  workflow_dispatch:
 env:
   DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
 
