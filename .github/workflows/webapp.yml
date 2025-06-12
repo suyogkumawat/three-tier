@@ -33,16 +33,6 @@ jobs:
 
             cd \$PROJECT_DIR
 
-            # Free required ports
-            for PORT in 5000 5001 3000; do
-              if lsof -i :$PORT >/dev/null 2>&1; then
-                PID=$(lsof -t -i :$PORT)
-                echo "Port $PORT is in use by PID $PID. Killing it..."
-                kill -9 $PID
-              else
-                echo "Port $PORT is free."
-              fi
-            done
 
             # Stop any running containers
             docker compose down || true
