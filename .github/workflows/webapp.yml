@@ -1,0 +1,43 @@
+name: 3-Tier Python App
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy on EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Deploy via SSH to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+
+            # Variables
+            REPO_NAME=three-tier
+            PROJECT_DIR=\$HOME/\$REPO_NAME
+
+            # Clone or pull latest code
+            if [ ! -d "\$PROJECT_DIR" ]; then
+              git clone https://github.com/YOUR_USERNAME/\$REPO_NAME.git \$PROJECT_DIR
+            else
+              cd \$PROJECT_DIR
+              git pull origin main
+            fi
+
+            cd \$PROJECT_DIR
+
+            # Stop any running containers
+            docker compose down || true
+
+            # Build and start containers
+            docker compose build --no-cache
+            docker compose up -d --remove-orphans
+
+          EOF
