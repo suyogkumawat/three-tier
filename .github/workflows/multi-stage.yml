@@ -20,7 +20,7 @@ jobs:
         run: docker save frontend-image:latest -o frontend-image.tar
 
       - name: Upload frontend image artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-image
           path: frontend-image.tar
@@ -40,7 +40,7 @@ jobs:
         run: docker save backend-image:latest -o backend-image.tar
 
       - name: Upload backend image artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-image
           path: backend-image.tar
@@ -60,7 +60,7 @@ jobs:
         run: docker save db-image:latest -o db-image.tar
 
       - name: Upload db image artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: db-image
           path: db-image.tar
@@ -76,17 +76,17 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Download frontend image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: frontend-image
 
       - name: Download backend image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: backend-image
 
       - name: Download db image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: db-image
 
