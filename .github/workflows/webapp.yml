@@ -1,7 +1,8 @@
 name: 3-Tier Python App
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main] 
 
 jobs:
   deploy:
