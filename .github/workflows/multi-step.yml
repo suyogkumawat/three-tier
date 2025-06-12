@@ -1,0 +1,60 @@
+name: 3-Tier Python App
+
+on:
+  push:
+    branches: [main]  # Trigger workflow only when code is pushed to the 'main' branch
+
+jobs:
+  deploy:
+    name: Deploy on EC2 Instance
+    runs-on: ubuntu-latest  # Run the job on the latest Ubuntu GitHub-hosted runner
+
+    steps:
+      # Step 1: Set up SSH access using your private key from secrets
+      - name: Add SSH Key for EC2 Access
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      # Step 2: Clone or update the repository on the EC2 machine
+      - name: Clone or Update Repo on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            REPO_NAME=three-tier
+            PROJECT_DIR=\$HOME/\$REPO_NAME
+
+            echo "🔄 Cloning or pulling latest changes from GitHub..."
+            if [ ! -d "\$PROJECT_DIR" ]; then
+              git clone https://github.com/suyogkumawat/three-tier.git \$PROJECT_DIR
+            else
+              cd \$PROJECT_DIR
+              git pull origin main
+            fi
+          EOF
+
+      # Step 3: Stop existing containers
+      - name: Stop Existing Docker Containers
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            echo "🛑 Stopping any running Docker containers..."
+            cd \$HOME/three-tier
+            docker compose down || true
+          EOF
+
+      # Step 4: Build Docker containers
+      - name: Build Docker Images on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            echo "🔨 Building Docker images..."
+            cd \$HOME/three-tier
+            docker compose build --no-cache
+          EOF
+
+      # Step 5: Start Docker containers
+      - name: Start Docker Containers
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            echo "🚀 Starting Docker containers..."
+            cd \$HOME/three-tier
+            docker compose up -d --remove-orphans
+          EOF
