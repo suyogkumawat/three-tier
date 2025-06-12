@@ -56,7 +56,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           # Clone repo (first time) or pull latest changes
           if [ ! -d "three-tier-python-app" ]; then
-            git clone https://github.com/suyogkumawat/three-tier/.git
+            git clone https://github.com/suyogkumawat/three-tier.git
           else
             cd three-tier
             git pull origin main
