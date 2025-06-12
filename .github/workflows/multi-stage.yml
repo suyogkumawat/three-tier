@@ -71,11 +71,10 @@ jobs:
       - name: List downloaded files
         run: ls -lah
 
-      - name: Copy image files to EC2
+      - name: Transfer Docker images to EC2
         run: |
-          scp -o StrictHostKeyChecking=no frontend-artifact/frontend-image.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/frontend-image.tar
-          scp -o StrictHostKeyChecking=no backend-artifact/backend-image.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/backend-image.tar
-
+          scp -o StrictHostKeyChecking=no frontend-image.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/frontend-image.tar
+          scp -o StrictHostKeyChecking=no backend-image.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/backend-image.tar
 
       - name: Deploy via SSH
         run: |
