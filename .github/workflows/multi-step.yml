@@ -1,8 +1,8 @@
 name: 3-Tier Python App
 
 on:
-  push:
-    branches: [main]  # Trigger workflow only when code is pushed to the 'main' branch
+  workflow_dispatch:    
+    # Trigger workflow only when code is pushed to the 'main' branch
 
 jobs:
   deploy:
