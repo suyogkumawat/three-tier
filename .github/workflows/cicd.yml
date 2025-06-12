@@ -37,6 +37,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USER }}/python-backend:latest
 
+ 
   deploy:
     name: Deploy to EC2 Instance
     needs: build
@@ -51,9 +52,25 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            docker pull ${{ secrets.DOCKERHUB_USER }}/python-frontend:latest
-            docker pull ${{ secrets.DOCKERHUB_USER }}/python-backend:latest
-            cd ~/three-tier-python-app
-            docker-compose down
-            docker-compose up -d
+
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          # Clone repo (first time) or pull latest changes
+          if [ ! -d "three-tier-python-app" ]; then
+            git clone https://github.com/your-username/your-repo-name.git three-tier-python-app
+          else
+            cd three-tier-python-app
+            git pull origin main
+            cd ..
+          fi
+
+          # Navigate to the repo
+          cd three-tier-python-app
+
+          # Pull latest Docker images
+          docker pull ${{ secrets.DOCKERHUB_USER }}/python-frontend:latest
+          docker pull ${{ secrets.DOCKERHUB_USER }}/python-backend:latest
+
+          # Restart containers
+          docker compose down
+          docker compose up -d
           EOF
