@@ -66,11 +66,6 @@ jobs:
         with:
           name: backend-image
 
-      - name: Download db image
-        uses: actions/download-artifact@v4
-        with:
-          name: db-image
-
       - name: Deploy via SSH
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
@@ -89,7 +84,6 @@ jobs:
           # Load images into Docker
           docker load -i ../frontend-image.tar
           docker load -i ../backend-image.tar
-          docker load -i ../db-image.tar
 
           # Restart containers
           docker compose down
