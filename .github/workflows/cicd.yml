@@ -1,9 +1,13 @@
+name: CI/CD Project  
+on:                        
+  push:
+    branches:
+      - main
 env:
-  DOCKERHUB_USER: ${{ vars.DOCKERHUB_USER }}
+  DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
 
 jobs:
   build:
-    name: Build and Push Docker Images
     runs-on: ubuntu-latest
 
     steps:
@@ -13,7 +17,7 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ vars.DOCKERHUB_USER }}
+          username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push Frontend
@@ -21,14 +25,14 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ${{ vars.DOCKERHUB_USER }}/frontend:latest
+          tags: ${{ secrets.DOCKERHUB_USER }}/frontend:latest
 
       - name: Build and Push Backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           push: true
-          tags: ${{ vars.DOCKERHUB_USER }}/backend:latest
+          tags: ${{ secrets.DOCKERHUB_USER }}/backend:latest
 
   deploy:
     name: Deploy to EC2
@@ -44,8 +48,8 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            docker pull ${{ vars.DOCKERHUB_USER }}/frontend:latest
-            docker pull ${{ vars.DOCKERHUB_USER }}/backend:latest
+            docker pull ${{ secrets.DOCKERHUB_USER }}/frontend:latest
+            docker pull ${{ secrets.DOCKERHUB_USER }}/backend:latest
             cd ~/three-tier-app
             docker-compose down
             docker-compose up -d
