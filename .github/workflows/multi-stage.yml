@@ -1,0 +1,116 @@
+name: Deploy 3-Tier App
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-frontend:
+    name: Build Frontend Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build frontend Docker image
+        run: |
+          docker build -t frontend-image:latest ./frontend
+
+      - name: Save frontend image
+        run: docker save frontend-image:latest -o frontend-image.tar
+
+      - name: Upload frontend image artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-image
+          path: frontend-image.tar
+
+  build-backend:
+    name: Build Backend Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build backend Docker image
+        run: |
+          docker build -t backend-image:latest ./backend
+
+      - name: Save backend image
+        run: docker save backend-image:latest -o backend-image.tar
+
+      - name: Upload backend image artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-image
+          path: backend-image.tar
+
+  build-db:
+    name: Build DB Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build DB Docker image
+        run: |
+          docker build -t db-image:latest ./db
+
+      - name: Save db image
+        run: docker save db-image:latest -o db-image.tar
+
+      - name: Upload db image artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: db-image
+          path: db-image.tar
+
+  deploy:
+    name: Deploy to EC2 Instance
+    needs: [build-frontend, build-backend, build-db]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Download frontend image
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-image
+
+      - name: Download backend image
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-image
+
+      - name: Download db image
+        uses: actions/download-artifact@v3
+        with:
+          name: db-image
+
+      - name: Deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          if [ ! -d "three-tier-python-app" ]; then
+            git clone https://github.com/suyogkumawat/three-tier.git
+          else
+            cd three-tier
+            git pull origin main
+            cd ..
+          fi
+          cd three-tier
+
+          # Copy image tar files to server (use scp or rsync if needed)
+          # Example assumes images are already on server, otherwise upload them
+
+          # Load images into Docker
+          docker load -i ../frontend-image.tar
+          docker load -i ../backend-image.tar
+          docker load -i ../db-image.tar
+
+          # Restart containers
+          docker compose down
+          docker compose up -d
+          EOF
