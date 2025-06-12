@@ -3,4 +3,4 @@ CREATE TABLE IF NOT EXISTS sample (
   name TEXT NOT NULL
 );
 
-INSERT INTO sample (name) VALUES ('Hello from PostgreSQL Let's get started');
+INSERT INTO sample (name) VALUES ('Hello from PostgreSQL Lets get started');
